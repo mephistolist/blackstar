@@ -255,8 +255,7 @@ while(optind < argc) {
 		strcat(ptr8->sshpass, " -p ");
 		strcat(ptr8->sshpass, ptr4->port);
 	}
-	//system(ptr8->sshpass);
-	printf("%s\n", ptr8->sshpass);
+	system(ptr8->sshpass);
    }
    else{
 	usage();
