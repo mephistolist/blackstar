@@ -7,8 +7,6 @@
 #include <unistd.h>
 #include <pthread.h>
 
-//#define GetCurrentDir getcwd
-
 /* perform_work function args struct */
 typedef struct {
     char arg_1[200];
