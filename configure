@@ -686,6 +686,7 @@ LDFLAGS
 LIBS
 CPPFLAGS'
 
+
 # Initialize some variables set by options.
 ac_init_help=
 ac_init_version=false
@@ -707,7 +708,6 @@ srcdir=
 verbose=
 x_includes=NONE
 x_libraries=NONE
-LDFLAGS=-lpthread
 
 # Installation directory options.
 # These are left unexpanded so users can "make install exec_prefix=/foo"
@@ -2834,9 +2834,7 @@ else
   ac_save_c_werror_flag=$ac_c_werror_flag
    ac_c_werror_flag=yes
    ac_cv_prog_cc_g=no
-   CFLAGS="-s"
-   OPT=-O0
-   PTHREAD=-pthread
+   CFLAGS="-g"
    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -2867,9 +2865,7 @@ if ac_fn_c_try_compile "$LINENO"; then :
 
 else
   ac_c_werror_flag=$ac_save_c_werror_flag
-	 CFLAGS="-s"
-	 OPT=-O0
-	 PTHREAD=-pthread
+	 CFLAGS="-g"
 	 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -2897,17 +2893,13 @@ if test "$ac_test_CFLAGS" = set; then
   CFLAGS=$ac_save_CFLAGS
 elif test $ac_cv_prog_cc_g = yes; then
   if test "$GCC" = yes; then
-    CFLAGS="-s"
-    OPT=-O0
-    PTHREAD=-pthread
+    CFLAGS="-g -O0 -std=c18 -lpthread"
   else
-    CFLAGS=""
+    CFLAGS="-g"
   fi
 else
   if test "$GCC" = yes; then
-    CFLAGS="-s"
-    OPT=-O0
-    PTHREAD=-pthread
+    CFLAGS="-O2"
   else
     CFLAGS=
   fi
@@ -4563,4 +4555,3 @@ if test -n "$ac_unrecognized_opts" && test "$enable_option_checking" != no; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: unrecognized options: $ac_unrecognized_opts" >&5
 $as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
 fi
-
