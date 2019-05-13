@@ -155,7 +155,7 @@ int file_open(char *name, char *comm){
     }
 
     FILE *fp = fopen(name, "r");
-    for (ptr19->i;1;ptr19->i++) {
+    for(;1;ptr19->i++) {
 
         /* have we gone over our line allocation? */
         if (ptr19->i >= ptr17->lines_allocated) {
@@ -334,7 +334,7 @@ while(optind < argc) {
 
    char *freeit[7] = {ptr1->input, ptr2->host, ptr3->user, ptr4->port, ptr5->pass, ptr6->dcrypt, ptr9->ccrypt};
 
-   for(ptr27->x; ptr27->x < 7; ptr27->x++){
+   for(; ptr27->x < 7; ptr27->x++){
 	   if(freeit[ptr27->x] != NULL){free(freeit[ptr27->x]);}
    }
   
