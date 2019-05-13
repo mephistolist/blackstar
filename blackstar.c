@@ -213,8 +213,9 @@ int file_open(char *name, char *comm){
     }
 
     /* free memory */
-    for (;ptr19->i>=0;ptr19->i--)
+    for (;ptr19->i>=0;ptr19->i--){
         free(ptr23->words[ptr19->i]);
+    }
     free(ptr23->words);
 
     return 0;
