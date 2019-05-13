@@ -16,7 +16,7 @@
  
     You may compile this code with the following:
     
-    gcc -O0 blackstar.c -o blackstar -lpthread -s */
+    gcc -Ofast blackstar.c -o blackstar -lpthread -s */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -25,9 +25,7 @@
 #include <getopt.h>
 #include <unistd.h>
 #include <pthread.h>
-
-/* counter for threads */
-int count = 0;
+#include <stdarg.h>
 
 /* perform_work function args struct */
 typedef struct {
@@ -44,6 +42,25 @@ union options {
   char *ccrypt; 
   char *input;
   char *exec;
+  unsigned short int fflag; 
+  unsigned short int lflag; 
+  unsigned short int uflag; 
+  unsigned short int wflag; 
+  unsigned short int pflag; 
+  unsigned short int eflag; 
+  unsigned short int oflag; 
+  unsigned short int dflag;
+  int lines_allocated;
+  int max_line_len;
+  int i;
+  int j;
+  int new_size;
+  int result_code;
+  char **words;
+  int index;
+  int count;
+  int opt;
+  unsigned short int x;
 };
 
 int usage(){
@@ -55,98 +72,149 @@ int usage(){
 	    "-w  Password for user.\n"
 	    "-d  Decrypt password file made with ccrypt.\n"
             "-e  Commands to be executed. Use quotes for multiple.\n"
-	    "-o  Skip host checking\n"
 	    "-h  Usage text.\n\n");
-	return 1;
+	return 0;
+}
+
+void single(char* howmany, ...){ 
+        int argc=0;
+        char *argv[250];
+	union options opt8, *ptr8 = &opt8;
+	opt8.sshpass = NULL;
+        va_list ap; 
+        va_start(ap, howmany);
+
+        while((argc<(16-2))&&howmany[argc++]) argv[argc]=va_arg(ap, char *);
+
+        argv[argc]=NULL;         
+	va_end(ap);
+
+	if(argv[5] == NULL){
+		ptr8->sshpass = (char *)malloc(strlen(argv[3]) + strlen(argv[1]) + strlen(argv[2]) + strlen(argv[4]) + 58);
+	}
+	else{
+		ptr8->sshpass = (char *)malloc(strlen(argv[3]) + strlen(argv[1]) + strlen(argv[2]) + strlen(argv[4]) + strlen(argv[5]) + 58);
+	}
+
+	if(argv[3] != NULL){	
+		strcpy(ptr8->sshpass, "sshpass -p \"");
+		strcat(ptr8->sshpass, argv[3]);
+		strcat(ptr8->sshpass, "\" ");
+	}
+	strcat(ptr8->sshpass, "ssh -o StrictHostKeyChecking=no -T ");
+	if(argv[5] != NULL){
+		strcat(ptr8->sshpass, " -p ");
+		strcat(ptr8->sshpass, argv[5]);
+		strcat(ptr8->sshpass, " ");
+	}
+	strcat(ptr8->sshpass, argv[1]);
+	strcat(ptr8->sshpass, "@");
+	strcat(ptr8->sshpass, argv[2]);
+	strcat(ptr8->sshpass, " \"");
+	strcat(ptr8->sshpass, argv[4]);
+	strcat(ptr8->sshpass, "\"");
+
+	system(ptr8->sshpass);
+	free(ptr8->sshpass);
 }
 
 /* function to execute in every thread */
 void *perform_work(void *argument){
+   union options opt25, *ptr25 = &opt25;
+   opt25.count = 0;
+
    arg_struct *actual_args = argument;
    system(actual_args->arg_1);
-   ++count;
-
+   ++ptr25->count;
    return NULL;
 }
 
 int file_open(char *name, char *comm){
-    int lines_allocated = 100;
-    int	max_line_len = 100;
 
-    /* allocate lines of text */
-    char **words = (char **)malloc(sizeof(char*)*lines_allocated);
-    if (words==NULL) {
+    union options opt17, *ptr17 = &opt17;
+    union options opt18, *ptr18 = &opt18;
+    union options opt19, *ptr19 = &opt19;
+    union options opt20, *ptr20 = &opt20;
+    union options opt21, *ptr21 = &opt21;
+    union options opt22, *ptr22 = &opt22;
+    union options opt23, *ptr23 = &opt23;
+    union options opt24, *ptr24 = &opt24;
+
+    opt17.lines_allocated = 100;
+    opt18.max_line_len = 100;
+    opt19.i = 0;
+    opt20.j = 0;
+    opt21.new_size = 0;
+    opt22.result_code = 0;
+    opt23.words = (char **)malloc(sizeof(char*)*ptr17->lines_allocated);
+    opt24.index = 0;
+
+    if (ptr23->words==NULL) {
         fprintf(stderr,"Out of memory (1).\n");
         exit(1);
     }
 
     FILE *fp = fopen(name, "r");
-    int i;
-    for (i=0;1;i++) {
-        int j;
+    for (ptr19->i;1;ptr19->i++) {
 
         /* have we gone over our line allocation? */
-        if (i >= lines_allocated) {
-            int new_size;
+        if (ptr19->i >= ptr17->lines_allocated) {
 
             /* Double our allocation and re-allocate */
-            new_size = lines_allocated*2;
-            words = (char **)realloc(words,sizeof(char*)*new_size);
-            if (words==NULL){
+            ptr21->new_size = ptr17->lines_allocated*2;
+            ptr23->words = (char **)realloc(ptr23->words,sizeof(char*)*ptr21->new_size);
+            if (ptr23->words==NULL){
                 fprintf(stderr,"Out of memory.\n");
                 exit(3);
             }
-            lines_allocated = new_size;
+            ptr17->lines_allocated = ptr21->new_size;
         }
 
         /* allocate space for the next line */
-        words[i] = malloc(max_line_len);
-        if (words[i]==NULL){
+        ptr23->words[ptr19->i] = malloc(ptr18->max_line_len);
+        if (ptr23->words[ptr19->i]==NULL){
             fprintf(stderr,"Out of memory (3).\n");
             exit(4);
         }
-        if (fgets(words[i],max_line_len-1,fp)==NULL)
+        if (fgets(ptr23->words[ptr19->i],ptr18->max_line_len-1,fp)==NULL)
             break;
 
         /* get rid of CR or LF at end of line */
-        for (j=strlen(words[i])-1;j>=0 && (words[i][j]=='\n' || words[i][j]=='\r');j--)
+        for (ptr20->j=strlen(ptr23->words[ptr19->i])-1;ptr20->j>=0 && (ptr23->words[ptr19->i][ptr20->j]=='\n' || ptr23->words[ptr19->i][ptr20->j]=='\r');ptr20->j--)
             ;
-        words[i][j+1]='\0';
+        ptr23->words[ptr19->i][ptr20->j+1]='\0';
     }
     fclose(fp);
 
-    pthread_t threads[i];
-    int result_code, index;
-    int *ptr[i];
+    pthread_t threads[ptr19->i];
+    int *ptr[ptr19->i];
 
     /* create all threads one by one */
-    arg_struct *args = malloc(sizeof(arg_struct)*i);
-    for (index = 0; index < i; ++index) { 
-        args[index].arg_1 = malloc((sizeof(words) + sizeof(comm))*i);    
-        strcpy(args[index].arg_1, words[index]);
-	strcat(args[index].arg_1, comm);
-        result_code = pthread_create(&threads[index], NULL, perform_work, &args[index]);
-        assert(0 == result_code);
+    arg_struct *args = malloc(sizeof(arg_struct)*ptr19->i);
+    for (ptr24->index = 0; ptr24->index < ptr19->i; ++ptr24->index) { 
+        args[ptr24->index].arg_1 = malloc((sizeof(ptr23->words) + sizeof(comm))*ptr19->i);    
+        strcpy(args[ptr24->index].arg_1, ptr23->words[ptr24->index]);
+	strcat(args[ptr24->index].arg_1, comm);
+        ptr22->result_code = pthread_create(&threads[ptr24->index], NULL, perform_work, &args[ptr24->index]);
+        assert(0 == ptr22->result_code);
     }
 
     /* wait for each thread to complete */
-    for (index = 0; index < i; ++index) {
+    for (ptr24->index = 0; ptr24->index < ptr19->i; ++ptr24->index) {
       // block until thread 'index' completes
-      result_code = pthread_join(threads[index], (void**)&(ptr[index]));
-      assert(0 == result_code);
+      ptr22->result_code = pthread_join(threads[ptr24->index], (void**)&(ptr[ptr24->index]));
+      assert(0 == ptr22->result_code);
     }
 
     /* free memory */
-    for (;i>=0;i--)
-        free(words[i]);
-    free(words);
+    for (;ptr19->i>=0;ptr19->i--)
+        free(ptr23->words[ptr19->i]);
+    free(ptr23->words);
 
     return 0;
 }
 
 int main (int argc, char **argv) {
-  unsigned short int fflag, lflag, uflag, wflag, pflag, eflag, oflag, dflag = 0;
-  short int opt = 0;
 
   union options opt1, *ptr1 = &opt1;
   union options opt2, *ptr2 = &opt2;
@@ -155,8 +223,16 @@ int main (int argc, char **argv) {
   union options opt5, *ptr5 = &opt5;
   union options opt6, *ptr6 = &opt6;
   union options opt7, *ptr7 = &opt7;
-  union options opt8, *ptr8 = &opt8;
   union options opt9, *ptr9 = &opt9;
+  union options opt10, *ptr10 = &opt10;
+  union options opt11, *ptr11 = &opt11;
+  union options opt12, *ptr12 = &opt12;
+  union options opt13, *ptr13 = &opt13;
+  union options opt14, *ptr14 = &opt14;
+  union options opt15, *ptr15 = &opt15;
+  union options opt16, *ptr16 = &opt16;
+  union options opt26, *ptr26 = &opt26;
+  union options opt27, *ptr27 = &opt27;
 
   opt1.input = NULL;
   opt2.host = NULL;
@@ -165,50 +241,55 @@ int main (int argc, char **argv) {
   opt5.pass = NULL;
   opt6.dcrypt = NULL;
   opt7.exec = NULL;
-  opt8.sshpass = NULL;
   opt9.ccrypt = NULL;
+  opt10.fflag = 0;
+  opt11.lflag = 0;
+  opt12.uflag = 0;
+  opt13.wflag = 0;
+  opt14.pflag = 0;
+  opt15.eflag = 0;
+  opt16.dflag = 0;
+  opt26.opt = 0;
+  opt27.x = 0;
 
 while(optind < argc) {
-  if(( opt = getopt(argc, argv, "f:l:u:p:w:e:d:ho")) != -1){
-   switch(opt){
+  if((ptr26->opt = getopt(argc, argv, "f:l:u:p:w:e:d:h")) != -1){
+   switch(ptr26->opt){
      case 'f':
-       fflag = 1;
-       ptr1->input=(char *)malloc(strlen(optarg) + 1);
+       ptr10->fflag = 1;
+       ptr1->input=(char *)malloc(strlen(optarg)+1);
        strcpy(ptr1->input, optarg);
        break;
      case 'l':
-       lflag = 1;
-       ptr2->host=(char *)malloc(strlen(optarg) + 1);
+       ptr11->lflag = 1;
+       ptr2->host=(char *)malloc(strlen(optarg)+1);
        strcpy(ptr2->host, optarg);
        break;
      case 'u':
-       uflag = 1;
-       ptr3->user=(char *)malloc(strlen(optarg) + 1);
+       ptr12->uflag = 1;
+       ptr3->user=(char *)malloc(strlen(optarg)+1);
        strcpy(ptr3->user, optarg);
        break;
      case 'p':
-       pflag = 1;
-       ptr4->port=(char *)malloc(strlen(optarg) + 1);
+       ptr14->pflag = 1;
+       ptr4->port=(char *)malloc(strlen(optarg)+1);
        strcpy(ptr4->port, optarg);
        break;
      case 'w':
-       wflag = 1;
-       ptr5->pass=(char *)malloc(strlen(optarg) + 1);
+       ptr13->wflag = 1;
+       ptr5->pass=(char *)malloc(strlen(optarg)+1);
        strcpy(ptr5->pass, optarg);
        break;
      case 'd':
-       dflag = 1;
-       ptr6->dcrypt=(char *)malloc(strlen(optarg) + 1);
+       ptr16->dflag = 1;
+       ptr6->dcrypt=(char *)malloc(strlen(optarg)+1);
        strcpy(ptr6->dcrypt, optarg);
        break;
      case 'e':
-       eflag = 1;
-       ptr7->exec=(char *)malloc(strlen(optarg) + 1);
+       ptr15->eflag = 1;
+       ptr7->exec=(char *)malloc(strlen(optarg)+1);
        strcpy(ptr7->exec, " ");
        strcat(ptr7->exec, optarg);
-       break;
-     case 'o':
-       oflag = 1;
        break;
      case 'h':
        usage();
@@ -223,61 +304,39 @@ while(optind < argc) {
    }
 }
 
-   if(dflag == 1){
+   if(ptr16->dflag == 1){
 	ptr9->ccrypt=(char *)malloc(strlen(ptr6->dcrypt) + 1);   
 	strcpy(ptr9->ccrypt, "ccrypt -d ");
 	strcat(ptr9->ccrypt, ptr6->dcrypt);
 	system(ptr9->ccrypt);
    }
 
-   if (fflag == 1 && eflag == 1){ 
+   if(ptr10->fflag == 1 && ptr15->eflag == 1){
 	file_open(ptr1->input, ptr7->exec);
    }
-   else  if(fflag == 0 && lflag == 1 && uflag == 1 && eflag == 1){
-	ptr8->sshpass=(char *)malloc((sizeof(ptr2->host) + sizeof(ptr3->user) + sizeof(ptr7->exec) + sizeof(ptr4->port) + sizeof(ptr5->pass)) + 1);
-	if(wflag == 1){
-		strcpy(ptr8->sshpass, "sshpass -p \"");
-		strcat(ptr8->sshpass, ptr5->pass);
-		strcat(ptr8->sshpass, "\" ");
-	}
-	strcat(ptr8->sshpass, "ssh ");
-	if(oflag == 1){
-		strcat(ptr8->sshpass, "-o StrictHostKeyChecking=no ");
-	}
-	strcat(ptr8->sshpass, "-T ");
-	strcat(ptr8->sshpass, ptr3->user);
-	strcat(ptr8->sshpass, "@");
-	strcat(ptr8->sshpass, ptr2->host);
-	strcat(ptr8->sshpass, " '");
-	strcat(ptr8->sshpass, ptr7->exec);
-	strcat(ptr8->sshpass, "'");
-	if(pflag == 1){
-		strcat(ptr8->sshpass, " -p ");
-		strcat(ptr8->sshpass, ptr4->port);
-	}
-	system(ptr8->sshpass);
+   else if(ptr10->fflag == 0 && ptr11->lflag == 1 && ptr12->uflag == 1 && ptr13->wflag == 1 && ptr15->eflag == 1){
+	single("abcd", ptr3->user, ptr2->host, ptr5->pass, ptr7->exec);
+   }
+   else if(ptr10->fflag == 0 && ptr11->lflag == 1 && ptr12->uflag == 1 && ptr13->wflag == 1 && ptr15->eflag == 1 && ptr14->pflag == 1){
+	single("abcde", ptr3->user, ptr2->host, ptr5->pass, ptr7->exec, ptr4->port);
    }
    else{
 	usage();
-   }	   
+   }   
 
-   if(dflag == 1){ 
+   if(ptr16->dflag == 1){ 
 	printf("*File was decrypted for usage. Now re-encrypt it.*\n");
 	ptr6->dcrypt[strlen(ptr6->dcrypt)-4] = 0;
 	strcpy(ptr9->ccrypt, "ccrypt ");
         strcat(ptr9->ccrypt, ptr6->dcrypt);	
-	system(ptr8->sshpass);	
+	system(ptr9->ccrypt);	
    }
 
-   if(!ptr1->input){free(ptr1->input);}
-   if(!ptr8->sshpass){free(ptr8->sshpass);} 
-   if(!ptr2->host){free(ptr2->host);} 
-   if(!ptr3->user){free(ptr3->user);} 
-   if(!ptr7->exec){free(ptr7->exec);} 
-   if(!ptr5->pass){free(ptr5->pass);} 
-   if(!ptr4->port){free(ptr4->port);} 
-   if(!ptr9->ccrypt){free(ptr9->ccrypt);} 
-   if(!ptr6->dcrypt){free(ptr6->dcrypt);}  
+   char *freeit[7] = {ptr1->input, ptr2->host, ptr3->user, ptr4->port, ptr5->pass, ptr6->dcrypt, ptr9->ccrypt};
 
+   for(ptr27->x; ptr27->x < 7; ptr27->x++){
+	   if(freeit[ptr27->x] != NULL){free(freeit[ptr27->x]);}
+   }
+  
   return 0;
 }
