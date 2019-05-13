@@ -1,4 +1,4 @@
-At the time of this writing, this program compiles fine with no optimization. 
-If optimization is used it will work with the -f option, but single host options will segfault. 
-Also need configure file to execute without having to chmod +x it after download. 
-Lastly, the man page should be installed without the user having to copy the man file.
+Need configure file to execute without having to chmod +x it after download. 
+The man page should be installed without the user having to copy the man file.
+Maybe work to allow single usage mode with keys instead of only passwords. 
+Or maybe just advise key use for hosts file.
