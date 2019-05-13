@@ -149,6 +149,12 @@ int file_open(char *name, char *comm){
     opt23.words = (char **)malloc(sizeof(char*)*ptr17->lines_allocated);
     opt24.index = 0;
 
+    if( access(name, F_OK) == -1 ){
+	fprintf(stderr, "File not found.\n");
+	usage();
+	exit(2);
+    }
+	
     if (ptr23->words==NULL) {
         fprintf(stderr,"Out of memory (1).\n");
         exit(1);
