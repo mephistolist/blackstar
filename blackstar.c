@@ -16,8 +16,8 @@
  
     You may compile this code with the following:
     
-    gcc -Ofast blackstar.c -o blackstar -lpthread -s */
-
+    gcc -Ofast blackstar.c -o blackstar -lpthread -s --std=c18 
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
