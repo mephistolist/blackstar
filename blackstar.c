@@ -16,7 +16,7 @@
  
     You may compile this code with the following:
     
-    gcc -Ofast blackstar.c -o blackstar -lpthread -s --std=c18 
+    gcc -Ofast blackstar.c -o blackstar -lpthread -s 
 */
 #include <stdio.h>
 #include <stdlib.h>
