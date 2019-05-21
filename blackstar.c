@@ -198,7 +198,7 @@ int file_open(char *name, char *comm){
     /* create all threads one by one */
     arg_struct *args = malloc(sizeof(arg_struct)*ptr19->i);
     for (ptr24->index = 0; ptr24->index < ptr19->i; ++ptr24->index) { 
-        args[ptr24->index].arg_1 = malloc((sizeof(ptr23->words) + sizeof(comm))*ptr19->i);    
+        args[ptr24->index].arg_1 = malloc((sizeof(ptr23->words) + sizeof(comm) * 20)*ptr19->i);    
         strcpy(args[ptr24->index].arg_1, ptr23->words[ptr24->index]);
 	strcat(args[ptr24->index].arg_1, comm);
         ptr22->result_code = pthread_create(&threads[ptr24->index], NULL, perform_work, &args[ptr24->index]);
